@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import styles from "@/styles/Home.module.css";
 import { useEffect, useState } from "react";
 import Translations from "@/components/translations";
+import { stripProject } from "@/util/strip";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,31 +40,45 @@ export default function Home() {
         <header>
           <h1>translation editor</h1>
         </header>
-        <main className={styles.main}>
-          {projects ? (
-            <ul>
-              {projects.map((proj) => (
-                <li
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setSelected(proj)}
-                >
-                  {proj}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div>loading...</div>
-          )}
-
-          <div>
-            {selected && (
-              <>
-                <h2>{selected}</h2>
-                <Translations path={selected} />
-              </>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            width: "100%",
+          }}
+        >
+          <aside
+            style={{
+              maxWidth: "170px",
+            }}
+          >
+            {projects ? (
+              <ul>
+                {projects.map((proj) => (
+                  <li
+                    key={proj}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setSelected(proj)}
+                  >
+                    {stripProject(proj)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div>loading...</div>
             )}
-          </div>
-        </main>
+          </aside>
+          <main className={styles.main}>
+            <div>
+              {selected && (
+                <>
+                  <Translations path={selected} />
+                </>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
     </>
   );

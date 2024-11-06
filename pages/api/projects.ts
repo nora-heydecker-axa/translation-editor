@@ -8,8 +8,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>,
 ) {
-  console.log("meow");
-
   const cp = "/Users/nora/repos/axa-health/convenience-platform";
 
   const all = await walk({
