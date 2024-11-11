@@ -52,7 +52,8 @@ const LanguageInput: FC<{
 const KeyInput: FC<{
   path: string;
   initialName: string;
-}> = ({ path, initialName }) => {
+  deleteItem: () => void;
+}> = ({ path, initialName, deleteItem }) => {
   const [oldName, setOldName] = useState(initialName);
   const [name, setName] = useState(initialName);
   useEffect(() => {
@@ -81,6 +82,19 @@ const KeyInput: FC<{
         }}
       >
         OK
+      </button>
+      <button
+        onClick={() => {
+          fetch("/api/translations", {
+            method: "DELETE",
+            body: JSON.stringify({
+              path,
+              key: oldName,
+            }),
+          }).then(deleteItem);
+        }}
+      >
+        delete
       </button>
     </>
   );
@@ -173,7 +187,15 @@ const Translations: FC<Props> = ({ path }) => {
                     paddingRight: "16px",
                   }}
                 >
-                  <KeyInput path={path} initialName={key} />
+                  <KeyInput
+                    path={path}
+                    initialName={key}
+                    deleteItem={() => {
+                      const copy = { ...translations };
+                      delete copy[key];
+                      setTranslations(copy);
+                    }}
+                  />
                 </td>
                 <td>
                   <div

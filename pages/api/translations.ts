@@ -84,6 +84,19 @@ export default async function handler(
     res.status(200).json({
       success: true,
     });
+  } else if (req.method === "DELETE") {
+    const body = JSON.parse(req.body) as {
+      path: string;
+      key: string;
+    };
+
+    for (const lang of ["de", "fr", "it", "en"]) {
+      await editFile(body.path, lang, (json) => {
+        delete json[body.key];
+      })
+    }
+
+    res.status(200).json({success: true});
   } else {
     res.status(405).json({
       error: "method not allowed",
@@ -102,6 +115,9 @@ async function editFile(
 
   func(json);
 
-  await fs.writeFile(filepath, JSON.stringify(json, null, 2) + "\n");
+  const keys = Object.keys(json);
+  keys.sort()
+
+  await fs.writeFile(filepath, JSON.stringify(json, keys, 2) + "\n");
   console.log(`Writing update to ${filepath}`);
 }
