@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as fs from "node:fs/promises";
 import path from "node:path";
+import config from "@/util/config";
 
 type Languages = {
   de: string;
@@ -12,10 +13,10 @@ type Languages = {
 
 type Data = Record<string, Languages>;
 
-const CP = "/Users/nora/repos/axa-health/convenience-platform";
-
 async function append(result: Data, dirpath: string, lang: keyof Languages) {
-  const content = await fs.readFile(path.join(CP, dirpath, `${lang}.json`));
+  const content = await fs.readFile(
+    path.join(config.rootPath, dirpath, `${lang}.json`),
+  );
   const all = JSON.parse(content.toString("utf-8"));
   for (const prop of Object.keys(all)) {
     if (!result[prop]) {
@@ -93,10 +94,10 @@ export default async function handler(
     for (const lang of ["de", "fr", "it", "en"]) {
       await editFile(body.path, lang, (json) => {
         delete json[body.key];
-      })
+      });
     }
 
-    res.status(200).json({success: true});
+    res.status(200).json({ success: true });
   } else {
     res.status(405).json({
       error: "method not allowed",
@@ -109,14 +110,14 @@ async function editFile(
   lang: string,
   func: (json: Record<string, string>) => void,
 ) {
-  const filepath = path.join(CP, projectPath, `${lang}.json`);
+  const filepath = path.join(config.rootPath, projectPath, `${lang}.json`);
   const content = await fs.readFile(filepath);
   const json = JSON.parse(content.toString("utf-8"));
 
   func(json);
 
   const keys = Object.keys(json);
-  keys.sort()
+  keys.sort();
 
   await fs.writeFile(filepath, JSON.stringify(json, keys, 2) + "\n");
   console.log(`Writing update to ${filepath}`);

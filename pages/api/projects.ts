@@ -1,17 +1,17 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import walk from "ignore-walk";
+import config from "@/util/config";
 
 type Data = string[];
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>,
-) {
-  const cp = "/Users/nora/repos/axa-health/convenience-platform";
-
+let allDirectories: string[] | undefined;
+async function findProjects(): Promise<string[]> {
+  if (allDirectories) {
+    return allDirectories;
+  }
   const all = await walk({
-    path: cp,
+    path: config.rootPath,
     ignoreFiles: [".gitignore"],
   });
   const results = all.filter((path) => {
@@ -38,5 +38,15 @@ export default async function handler(
   const projectsSorted = [...projects];
   projectsSorted.sort();
 
-  res.status(200).json(projectsSorted);
+  allDirectories = projectsSorted;
+  return allDirectories;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>,
+) {
+  const projects = await findProjects();
+
+  res.status(200).json(projects);
 }
