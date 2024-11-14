@@ -119,7 +119,7 @@ const Translations: FC<Props> = ({ path }) => {
     if (newTranslationRef.current && scrollToNewTranslation) {
       newTranslationRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [scrollToNewTranslation, newTranslationRef.current]);
+  }, [scrollToNewTranslation]);
 
   const translationEntries = translations && Object.entries(translations);
 
@@ -200,28 +200,82 @@ const Translations: FC<Props> = ({ path }) => {
                 <td>
                   <div
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: "30px 1fr",
-                      marginBottom: "8px",
+                      display: "flex",
                     }}
                   >
-                    {(["de", "fr", "it", "en"] as const).map((lang) => (
-                      <Fragment key={lang}>
-                        <span
-                          style={{
-                            marginBottom: "4px",
-                          }}
-                        >
-                          {lang.toUpperCase()}{" "}
-                        </span>
-                        <LanguageInput
-                          initialValue={values[lang]}
-                          theKey={key}
-                          lang={lang}
-                          path={path}
-                        />
-                      </Fragment>
-                    ))}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "30px 1fr",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {(["de", "fr", "it", "en"] as const).map((lang) => (
+                        <Fragment key={lang}>
+                          <span
+                            style={{
+                              marginBottom: "4px",
+                            }}
+                          >
+                            {lang.toUpperCase()}{" "}
+                          </span>
+                          <LanguageInput
+                            initialValue={values[lang]}
+                            theKey={key}
+                            lang={lang}
+                            path={path}
+                          />
+                        </Fragment>
+                      ))}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(values));
+                        }}
+                      >
+                        copy all
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const text = await navigator.clipboard.readText();
+                          try {
+                            const value = JSON.parse(text);
+                            if (
+                              "de" in value &&
+                              "en" in value &&
+                              "fr" in value &&
+                              "it" in value
+                            ) {
+                              setTranslations({
+                                ...translations,
+                                [key]: value,
+                              });
+                              for (const lang of ["de", "en", "it", "fr"]) {
+                                fetch("/api/translations", {
+                                  method: "PATCH",
+                                  body: JSON.stringify({
+                                    path,
+                                    lang,
+                                    key: key,
+                                    value: value[lang],
+                                  }),
+                                }).catch((err) => alert(err.message));
+                              }
+                            }
+                          } catch (e) {
+                            console.warn(e);
+                          }
+                        }}
+                      >
+                        paste all
+                      </button>
+                    </div>
                   </div>
                 </td>
               </tr>
