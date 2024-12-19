@@ -81,7 +81,7 @@ const KeyInput: FC<{
           });
         }}
       >
-        OK
+        rename key
       </button>
       <button
         onClick={() => {
