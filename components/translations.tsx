@@ -196,6 +196,9 @@ const Translations: FC<Props> = ({ path }) => {
                       setTranslations(copy);
                     }}
                   />
+                  <button onClick={() => {
+                    navigator.clipboard.writeText(`intl.formatMessage({id: '${key}'})`)
+                  }}>copy intl.formatMessage</button>
                 </td>
                 <td>
                   <div
